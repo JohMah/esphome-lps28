@@ -1,11 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, i2c
-from esphome.constants import (
-    STATE_CLASS_MEASUREMENT,
-    DEVICE_CLASS_PRESSURE,
-    DEVICE_CLASS_TEMPERATURE,
-)
 
 # 1. Declare the exact C++ namespace and binding class
 lps28_ns = cg.esphome_ns.namespace("lps28")
@@ -13,7 +8,7 @@ LPS28Component = lps28_ns.class_("LPS28Component", cg.PollingComponent, i2c.I2CD
 
 DEPENDENCIES = ["i2c"]
 
-# 2. Build the exact expected configuration validation matrix
+# 2. Build the configuration schema using clean string literals instead of broken constants
 CONFIG_SCHEMA = (
     cv.Schema(
         {
@@ -21,14 +16,14 @@ CONFIG_SCHEMA = (
             cv.Optional("pressure"): sensor.sensor_schema(
                 unit_of_measurement="hPa",
                 accuracy_decimals=2,
-                device_class=DEVICE_CLASS_PRESSURE,
-                state_class=STATE_CLASS_MEASUREMENT,
+                device_class="pressure",
+                state_class="measurement",
             ),
             cv.Optional("temperature"): sensor.sensor_schema(
                 unit_of_measurement="°C",
                 accuracy_decimals=1,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
+                device_class="temperature",
+                state_class="measurement",
             ),
         }
     )
@@ -36,8 +31,7 @@ CONFIG_SCHEMA = (
     .extend(i2c.i2c_device_schema(0x5C))
 )
 
-# 3. CRITICAL: Register the platform string directly with the ESPHome generation pipeline
-# This removes the "Platform not found" error permanently
+# 3. Clean generator to link the pipeline variables
 def to_code(config):
     var = cg.new_Pvariable(config[cv.GenerateID()])
     yield cg.register_component(var, config)
